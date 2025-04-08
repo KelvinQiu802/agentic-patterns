@@ -10,3 +10,7 @@ export const ORCHASTRATOR_PROMPT = `
 根据标题生成一个撰写报告的计划
 标题: 
 `;
+
+export const WORKER_PROMPT = `
+根据小节名称和描述, 生成小节内容
+`;
