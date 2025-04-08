@@ -1,5 +1,6 @@
 import ChatOpenAI from "../ChatOpenAI";
 import z from 'zod';
+import { logTitle } from "../utils";
 
 const EvaluatorResponseSchema = z.object({
     reason: z.string().describe('Must return first'),
@@ -35,11 +36,11 @@ export default class ReflectionAgent {
     async invoke(prompt: string, maxIterations: number = 5) {
         if (maxIterations <= 0) throw new Error('maxIterations must be greater than 0');
         for (let i = 0; i < maxIterations; i++) {
-            console.log(`Iteration ${i + 1} of ${maxIterations}`);
-            console.log('=================================== GENERATION ===================================');
+            logTitle(`Iteration ${i + 1} of ${maxIterations}`);
+            logTitle('GENERATION');
             const generatorResponse = await this.generate(prompt);
             if (i === maxIterations - 1) return generatorResponse; // Return on the last iteration
-            console.log('=================================== EVALUATION ===================================');
+            logTitle('EVALUATION');
             const evaluatorResponse = await this.evaluate(generatorResponse);
             if (evaluatorResponse.pass) return generatorResponse; // Return if the evaluator passes
             prompt = evaluatorResponse.suggestion;
