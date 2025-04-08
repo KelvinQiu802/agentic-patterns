@@ -1,7 +1,8 @@
-import OpenAI from "openai";
+import OpenAI, { APIUserAbortError } from "openai";
 import 'dotenv/config';
 import z from 'zod';
 import { zodResponseFormat } from 'openai/helpers/zod';
+import { RequestOptions } from "openai/core";
 
 export default class ChatOpenAI {
     private openai: OpenAI;
@@ -18,14 +19,14 @@ export default class ChatOpenAI {
         sysPrompt && this.messages.push({ role: 'system', content: sysPrompt });
     }
 
-    async chat(prompt: string, responseFormat?: z.ZodSchema) {
+    async chat(prompt: string, responseFormat?: z.ZodSchema, options?: RequestOptions) {
         this.messages.push({ role: 'user', content: prompt });
         const completion = await this.openai.chat.completions.create({
             model: this.model,
             messages: this.messages,
             stream: true,
             response_format: responseFormat ? zodResponseFormat(responseFormat, 'suggestion') : undefined,
-        });
+        }, options);
         let result = '';
         for await (const chunk of completion) {
             process.stdout.write(chunk.choices[0].delta.content || '');

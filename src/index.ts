@@ -1,13 +1,23 @@
-import OrchestratorWorkersAgent from "./agents/OrchestratorWorkersAgent";
-import ReflectionAgent from "./agents/ReflectionAgent";
-import { GENERATOR_PROMPT, EVALUATOR_PROMPT } from "./prompt";
+import GuardrailsAgent from "./agents/GuardrailsAgent";
+import ChatOpenAI from "./ChatOpenAI";
 
 async function main() {
-    // const reflectionAgent = new ReflectionAgent(GENERATOR_PROMPT, EVALUATOR_PROMPT);
-    // await reflectionAgent.invoke('写一个冒泡排序');
+    const inputGuardrail = async (input: string) => {
+        const llm = new ChatOpenAI(process.env.OPENAI_MODEL as string);
+        const result = await llm.chat(`请判断以下内容是否包含暴力内容：${input}，如果包含,输出true,否则输出false`);
+        return result.includes('true');
+    }
 
-    const orchestratorWorkersAgent = new OrchestratorWorkersAgent();
-    await orchestratorWorkersAgent.invoke('写一个关于Apple的报告');
+    const outputGuardrail = async (output: string) => {
+        return true;
+    }
+
+    const guardrailsAgent = new GuardrailsAgent(
+        inputGuardrail,
+        outputGuardrail
+    );
+
+    await guardrailsAgent.invoke('生成一个短篇小说');
 }
 
 main();
