@@ -1,23 +1,25 @@
-import GuardrailsAgent from "./agents/GuardrailsAgent";
-import ChatOpenAI from "./ChatOpenAI";
+import HandOffAgent from "./agents/HandOffAgent";
 
 async function main() {
-    const inputGuardrail = async (input: string) => {
-        const llm = new ChatOpenAI(process.env.OPENAI_MODEL as string);
-        const result = await llm.chat(`请判断以下内容是否包含暴力内容：${input}，如果包含,输出true,否则输出false`);
-        return result.includes('true');
-    }
-
-    const outputGuardrail = async (output: string) => {
-        return true;
-    }
-
-    const guardrailsAgent = new GuardrailsAgent(
-        inputGuardrail,
-        outputGuardrail
+    const englishAgent = new HandOffAgent(
+        'english_agent',
+        'You only speak English',
+        []
     );
 
-    await guardrailsAgent.invoke('生成一个短篇小说');
+    const chineseAgent = new HandOffAgent(
+        'chinese_agent',
+        '你只说中文',
+        []
+    );
+
+    const handOffAgent = new HandOffAgent(
+        'handoff_agent',
+        '你是一个分流助手，请根据用户的问题，将问题分流到不同的助手',
+        [englishAgent, chineseAgent]
+    );
+
+    await handOffAgent.invoke('帮我把下面的英文翻译成中文: To be or not to be, that is the question.');
 }
 
 main();
